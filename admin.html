@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <link rel="stylesheet" href="admin.css"> <!-- Link to your CSS file -->
+    <script type="module">
+        const apiUrl = "http://127.0.0.1:8000"; // Adjust to your FastAPI server URL
+
+        window.createAndAddUser = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const user_ref = document.getElementById('user_ref').value;
+            const busid=document.getElementById('busid').value;
+            const phone_number=document.getElementById('phone_number').value;
+            if (!email || !password || !name || !user_ref) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/users/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        name: name,
+                        user_ref: user_ref,
+                        bus_id:busid,
+                        phone_number:phone_number
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("User created successfully! User ID: " + data.user_id);
+                } else {
+                    alert("Error: " + data.detail);
+                }
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- User Creation Form -->
+        <div class="form-container">
+            <h3>Create User</h3>
+            <h4>Email:</h4>
+            <input type="email" id="email" placeholder="Enter user email">
+            
+            <h4>Password:</h4>
+            <input type="password" id="password" placeholder="Enter user password">
+            
+            <h4>Name:</h4>
+            <input id="name" placeholder="Enter user name">
+            
+            <h4>User Reference:</h4>
+            <input id="user_ref" placeholder="Enter user reference"><br>
+            <h4>Bus Id:</h4>
+            <input id="busid" type="number">
+            <h4>Phone number:</h4>
+            <input type="text" id="phone_number">
+            
+            <button onclick="createAndAddUser()">Create User</button>
+        </div>
+
+        <!-- Search Button Section -->
+        <div class="search-container">
+            <button onclick="searchUser()">Search</button>
+        </div>
+    </div>
+</body>
+</html>

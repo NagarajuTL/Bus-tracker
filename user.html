@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Page</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #restricted {
+            display: none;
+            color: red;
+            font-size: 2em;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            text-align: center;
+        }
+        #content {
+            display: none;
+        }
+        #h1 {
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }
+        #map {
+            height: 400px;
+            width: 70%;
+            margin: 20px auto; /* Center the map */
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjJgC_feqjRlLNwTAreAwKBwxzg4WLlzo",
+            authDomain: "project-1-70d13.firebaseapp.com",
+            projectId: "project-1-70d13",
+            storageBucket: "project-1-70d13.appspot.com",
+            messagingSenderId: "582309574350",
+            appId: "1:582309574350:web:0d91d9b8c36c769743c29f"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let userCircle; // Global variable for circle marker
+        let map;
+        let marker=null; 
+        let selected_lat=null;
+        let selected_lng=null;
+
+        onAuthStateChanged(auth, (user) => {
+            const contentDiv = document.getElementById('content');
+            const restrictedDiv = document.getElementById('restricted');
+
+            if (!user) {
+                restrictedDiv.style.display = 'block';
+                contentDiv.style.display = 'none';
+            } else {
+                restrictedDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+                getuser(user.uid);
+                fetchDriverLocation(user.uid); // Fetch driver's location
+            }
+        });
+
+        const getuser = async (userid) => {
+            const userref = doc(db, 'users', userid);
+            try {
+                const docsnap = await getDoc(userref);
+                if (docsnap.exists()) {
+                    const userdata = docsnap.data();
+                    display(userdata.name);
+                }
+            } catch (error) {
+                alert(error);
+            }
+        };
+
+        const display = (name) => {
+            const h1 = document.getElementById("h1");
+            h1.textContent = `Welcome ${name}`;
+            initMap(); // Initialize the map
+        };
+        
+        const initMap = () => {
+            map = L.map('map').setView([13.3392, 77.1016], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 25,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add tap-to-add-marker event listener
+            map.on('click', onMapClick);
+        };
+
+        const onMapClick = (e) => {
+            const { lat, lng } = e.latlng;
+
+            // Remove existing marker if it exists
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            // Add new marker
+            marker = L.marker([lat, lng]).addTo(map)
+                .bindPopup(`Latitude: ${lat}, Longitude: ${lng}`)
+                .openPopup();
+
+            // Log tapped location for confirmation
+            selected_lat=lat;
+            selected_lng=lng;
+        };
+
+        const fetchDriverLocation = async (userId) => {
+            const driverRef = doc(db, 'users', userId); // Adjust if driver data is stored separately
+            try {
+                const driverSnap = await getDoc(driverRef);
+                if (driverSnap.exists()) {
+                    const driverData = driverSnap.data();
+                    updateDriverLocationOnMap(driverData.bus_latitude, driverData.bus_longitude);
+                } else {
+                    console.error("No driver data found!");
+                }
+            } catch (error) {
+                console.error("Error fetching driver's location: ", error);
+            }
+        };
+
+        const updateDriverLocationOnMap = (lat, lon) => {
+            if (userCircle) {
+                userCircle.setLatLng([lat, lon]);
+            } else {
+                userCircle = L.circleMarker([lat, lon], {
+                    radius: 8,
+                    color: "blue",
+                    fillColor: "#3388ff",
+                    fillOpacity: 0.7
+                }).addTo(map);
+                map.setView([lat, lon], 17);  // Center map on driver's location
+            }
+        };
+
+        window.submit = () => {
+           senduserlocation(selected_lat,selected_lng);
+        };
+
+        const senduserlocation = async (latitude, longitude) => {
+    try {
+        const user = auth.currentUser;
+        if (user) {
+            const response = await fetch(`http://127.0.0.1:8000/add_location/${user.uid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_latitude: latitude,
+                    user_longitude: longitude
+                })
+            });
+
+            if (response.ok) {
+                alert("Location updated successfully!");
+            } else {
+                alert("Failed to update location. Server error.");
+            }
+        } else {
+            alert("Please login to continue");
+        }
+    } catch (error) {
+        console.error("Error updating the location:", error);
+        alert("Error in updating the location");
+    }
+};
+
+    </script>
+</head>
+<body>
+    <div id="restricted">
+        <h1>Access restricted</h1>
+        <p>You must <a href="auth.html">login</a> to access this page.</p>
+    </div>
+    <div id="content">
+        <h1 id="h1"></h1>
+        <!-- <input type="text" id="placeInput" placeholder="Enter the place"> -->
+        <button onclick="submit()">Submit</button>
+        
+        <div id="map"></div>
+    </div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</body>
+</html>

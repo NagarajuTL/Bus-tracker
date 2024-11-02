@@ -1,0 +1,53 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+/* Container for the form and search button */
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* Form container styles */
+.form-container {
+    max-width: 400px;
+}
+
+h3 {
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Search button styles */
+.search-container {
+    margin-top: 10px;
+}
+
+.search-container button {
+    background-color: #008CBA;
+}
+
+.search-container button:hover {
+    background-color: #007B9E;
+}

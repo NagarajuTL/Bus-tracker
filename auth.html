@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="auth.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+        import { getAuth, setPersistence, signInWithEmailAndPassword, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjJgC_feqjRlLNwTAreAwKBwxzg4WLlzo",
+            authDomain: "project-1-70d13.firebaseapp.com",
+            projectId: "project-1-70d13",
+            storageBucket: "project-1-70d13.appspot.com",
+            messagingSenderId: "582309574350",
+            appId: "1:582309574350:web:0d91d9b8c36c769743c29f"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Login function
+        window.login = async (event) => {
+            event.preventDefault();
+            
+            // Show loading message
+            document.getElementById("loading").style.display = "block";
+            
+            await setPersistence(auth, browserSessionPersistence);
+            const email = document.getElementById("email").value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const usercred = await signInWithEmailAndPassword(auth, email, password);
+                const user = usercred.user;
+                
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                const userdata = userDoc.data();
+                // const busId = userdata.bus_id;
+
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    localStorage.setItem('userId',user.uid);
+                    if (userData.role === "admin") {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "user.html";
+                    }
+                } else {
+                    alert("User data not found in Firestore.");
+                }
+            } catch (error) {
+                alert(error);
+            } finally {
+                document.getElementById("loading").style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+    <form id="form1">
+        <h1>Enter the Email-id and Password</h1>
+        <input id="email" placeholder="example@gmail.com" type="email" required><br>
+        <input id="password" placeholder="password" type="password" required><br>
+        <button onclick="login(event)" id="button">Login</button>
+        <div id="loading" style="display: none;text-align: end ; font-size: 2em; color: white;">
+            Loading, please wait...
+        </div>
+    </form>
+       
+</body>
+</html>

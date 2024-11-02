@@ -1,0 +1,61 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0; /* Remove any default margins */
+    text-align: center; /* Center the text */
+    background-color: hsl(215, 100%, 13%);
+}
+
+#form1 {
+    display: flex;
+    flex-direction: column; /* Stack inputs vertically */
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+    background-color: hsl(0, 86%, 25%);
+    height: 60vh;
+    padding: 20px;
+    box-shadow: 20px 20px 15px black;
+}
+h1{
+    margin:0;
+    margin-bottom: 20px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: white;
+    padding: 20px;
+}
+#email{
+    text-align: left;
+    font-size: 1.5em;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    width:70%;
+
+}
+#password{
+    text-align: left;
+    font-size: 1.5em;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    width:70%;
+}
+button{
+    border: none;
+    font-size: 1.7em;
+    padding: 15px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border-radius: 15px;
+    color:rgb(72, 143, 72);
+    background-color: hsl(0, 0%, 3%);
+}
+button:hover{
+    cursor: pointer;
+    background-color: hsl(0, 0%, 10%); ;
+}
+button:active{
+    background-color: hsl(0, 0%, 17%);;
+}
