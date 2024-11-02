@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Location Update</title>
+</head>
+<body>
+    <h1>Driver Location Tracker</h1>
+    <p>Your location will be updated automatically.</p>
+
+    <script>
+        // Extract bus_id from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const bus_id = urlParams.get('bus_id');
+
+        // Function to send location to FastAPI
+        function sendLocation(lat, lng) {
+            fetch(` http://127.0.0.1:8000/update-location/${bus_id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ latitude: lat, longitude: lng })
+            })
+            .then(response => response.json())
+            .catch(error => console.error("Error updating location:", error));
+        }
+
+        // Check if geolocation is available
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(
+                position => {
+                    const { latitude, longitude } = position.coords;
+                    console.log("Current Location: Latitude:", latitude, "Longitude:", longitude);
+
+                    sendLocation(latitude, longitude);
+                },
+                error => console.error("Error getting location:", error),
+                { enableHighAccuracy: true, maximumAge: 10000 }
+            );
+        } else {
+            alert("Geolocation is not supported by your browser.");
+        }
+    </script>
+</body>
+</html>
